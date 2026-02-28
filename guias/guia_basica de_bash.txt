@@ -1,0 +1,67 @@
+GUÍA BÁSICA DE BASH - COMPARACIONES, CICLOS Y MANEJO DE ARCHIVOS
+
+==================================== 1. COMPARACIONES (if, test, [[ ]])
+====================================
+
+1.1 if básico Uso: Ejecutar código según una condición.
+
+Ejemplo: if [ “$edad” -ge 18 ]; then echo “Mayor de edad” fi
+
+Operadores numéricos comunes: -eq Igual -ne Diferente -gt Mayor que -lt
+Menor que -ge Mayor o igual -le Menor o igual
+
+Operadores para strings: = Igual != Diferente -z Cadena vacía -n Cadena
+no vacía
+
+Ejemplo con strings: if [ “$nombre” = “Eduard” ]; then echo “Nombre
+correcto” fi
+
+==================================== 2. CICLOS
+====================================
+
+2.1 for Uso: Iterar sobre una lista de valores.
+
+Ejemplo: for i in 1 2 3 4 5; do echo “Número: $i” done
+
+Ejemplo recorriendo archivos: for archivo in *.txt; do echo “Archivo
+encontrado: $archivo” done
+
+2.2 while Uso: Ejecutar mientras una condición sea verdadera.
+
+Ejemplo: contador=1 while [ $contador -le 5 ]; do echo “Contador:
+$contador"  contador=$((contador + 1)) done
+
+2.3 until Uso: Ejecutar hasta que la condición sea verdadera.
+
+Ejemplo: contador=1 until [ $contador -gt 5 ]; do echo “Contador:
+$contador"  contador=$((contador + 1)) done
+
+==================================== 3. MANEJO DE DIRECTORIOS Y ARCHIVOS
+====================================
+
+3.1 Verificar si un archivo existe Uso: Comprobar si un archivo está
+presente.
+
+if [ -f “archivo.txt” ]; then echo “El archivo existe” fi
+
+Opciones comunes: -f Existe y es archivo regular -d Existe y es
+directorio -e Existe (archivo o directorio) -r Tiene permiso de lectura
+-w Tiene permiso de escritura -x Tiene permiso de ejecución
+
+3.2 Crear archivo touch archivo.txt
+
+3.3 Crear directorio mkdir nuevo_directorio
+
+3.4 Eliminar archivo rm archivo.txt
+
+3.5 Eliminar directorio rmdir directorio_vacio rm -r directorio_no_vacio
+
+3.6 Cambiar de directorio cd /ruta/del/directorio
+
+3.7 Listar archivos ls ls -l (formato detallado) ls -a (incluye archivos
+ocultos)
+
+3.8 Obtener ruta actual pwd
+
+==================================== FIN DEL DOCUMENTO
+====================================
