@@ -26,7 +26,7 @@
 
 struct i2c_msg msgs[2];
 struct i2c_rdwr_ioctl_data rdwr;
-const uint8_t reg_addr = ACCELEROMETER_ADDR; 
+const uint8_t reg_addr = 0x0F; 
 
 int main (void) {
     // Open the I2C device
