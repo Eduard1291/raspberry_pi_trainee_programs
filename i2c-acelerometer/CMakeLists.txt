@@ -7,9 +7,10 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Incluir headers
-include_directories(include)
+include_directories(inc)
 
 # Crear ejecutable
 add_executable(i2c_acelerometer
     src/main.c
+    src/i2c_driver.c
 )
