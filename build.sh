@@ -2,7 +2,8 @@
 
 set -e
 projectyDir=$1
-projectyDir=${projectyDir%/} # Eliminar la barra final si existe
+# Eliminar la barra final si existe
+projectyDir=${projectyDir%/} 
 
 #verificar si se ha proporcionado un argumento
 if [ -z "$projectyDir" ]; then
