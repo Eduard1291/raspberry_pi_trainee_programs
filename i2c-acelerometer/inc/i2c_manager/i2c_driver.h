@@ -7,10 +7,13 @@
 
 /*typedefs----------------------------------------------*/
 
+/**
+ * @brief Enumeration for I2C error codes. This enumeration defines the possible error codes that can be returned by the I2C driver functions.
+ */
 typedef enum i2c_error {
-    I2C_SUCCESS = 0,
-    I2C_ERROR_OPEN,
-    I2C_ERROR_IOCTL
+    I2C_SUCCESS = 0, /**< Success */
+    I2C_ERROR_OPEN, /**< Error opening I2C device */
+    I2C_ERROR_IOCTL /**< Error with I2C ioctl operation */
 }i2c_error_t;
 
 /*public functions--------------------------------------*/

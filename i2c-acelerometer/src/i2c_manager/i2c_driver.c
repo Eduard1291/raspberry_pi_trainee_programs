@@ -122,9 +122,11 @@ i2c_error_t i2c_write(uint8_t device_addr, uint8_t reg_addr, uint8_t *data, uint
  */
 i2c_error_t i2c_read(uint8_t device_addr, uint8_t reg_addr, uint8_t *data, uint16_t len){
     struct i2c_msg transaction_msg[WRITE_TRANSFER_MSGS];
+    // Set the MSB for auto-increment if reading multiple bytes
+    uint8_t multiple_reg_addr = reg_addr | 0x80; 
 
     // Set up the I2C message for writing the register address
-    SET_TRANSACTION_MSG(transaction_msg[0], device_addr, 0, 1, &reg_addr);
+    SET_TRANSACTION_MSG(transaction_msg[0], device_addr, 0, 1, &multiple_reg_addr);
     // Set et the I2C message for reading the data
     SET_TRANSACTION_MSG(transaction_msg[1], device_addr, I2C_M_RD, len, data);
     // Set up the ioctl data structure
