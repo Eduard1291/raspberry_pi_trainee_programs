@@ -57,9 +57,9 @@ typedef struct l3g4200d_temperature_data
  */
 typedef struct l3g4200d_angular_velocity_data
 {
-    uint16_t x; /**< X-axis angular velocity data (16-bit signed value) */
-    uint16_t y; /**< Y-axis angular velocity data (16-bit signed value) */
-    uint16_t z; /**< Z-axis angular velocity data (16-bit signed value) */
+    float x; /**< X-axis angular velocity data (16-bit signed value) */
+    float y; /**< Y-axis angular velocity data (16-bit signed value) */
+    float z; /**< Z-axis angular velocity data (16-bit signed value) */
 } l3g4200d_angular_velocity_data_t;
 
 

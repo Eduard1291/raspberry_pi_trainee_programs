@@ -11,11 +11,6 @@
 
 #define TAG "i2c-acelerometer: "
 
-static float raw_to_dps(uint16_t raw_value)
-{
-    return (int16_t)raw_value * L3G4200D_250DPS_SENSITIVITY;
-}
-
 int main (void) {
     l3g4200d_init_config_t config = L3G4200D_SET_DEFAULT_CONFIG;
     config.i2c_device = I2C_DEVICE;
@@ -43,9 +38,9 @@ int main (void) {
         }
 
         printf("\r\033[KVelocidad angular: X=%7.2f dps, Y=%7.2f dps, Z=%7.2f dps | Temperatura=%d C",
-               raw_to_dps(angular_velocity.x),
-               raw_to_dps(angular_velocity.y),
-               raw_to_dps(angular_velocity.z),
+               angular_velocity.x,
+               angular_velocity.y,
+               angular_velocity.z,
                temperature.temp_celsius);
         fflush(stdout);
 

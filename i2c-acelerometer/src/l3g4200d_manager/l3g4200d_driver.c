@@ -23,6 +23,10 @@
 
 static const char *TAG = "l3g4200d_driver";
 uint8_t device_addr; /**< I2C address of the L3G4200D sensor */
+uint8_t full_scale; /**< Full-scale selection for the sensor, used to calculate the sensitivity and convert raw data to physical units. This variable is set during initialization based on the configuration provided by the user, and it determines the range of angular velocity measurements that the sensor can capture. The value of Full_scale is used in the conversion formulas to translate raw sensor readings into meaningful angular velocity values in degrees per second (dps) or radians per second (rad/s), depending on the full-scale setting selected. */
+
+const char full_scale_sensitivity[4] = {0.00875f, 0.0175f, 0.07f, 0.07f}; /**< Sensitivity values for different full-scale settings of the L3G4200D sensor, used to convert raw angular velocity data to physical units (dps or rad/s). The sensitivity values correspond to the full-scale selections of 250 dps, 500 dps, and 2000 dps, respectively. These values are used in the conversion formulas to calculate the actual angular velocity from the raw sensor readings based on the selected full-scale setting. */
+const char *full_scale_range[4] = {"250 dps", "500 dps", "2000 dps", "2000 dps"}; /**< String representations of the full-scale ranges corresponding to the different full-scale settings of the L3G4200D sensor. These strings are used for logging and debugging purposes to indicate the current full-scale range configuration of the sensor, making it easier to understand the context of the angular velocity measurements being read from the sensor. */
 
 /*Prototypes--------------------------------------------*/
 
@@ -142,6 +146,9 @@ l3g4200d_error_t l3g4200d_init(l3g4200d_init_config_t *config){
     if (i2c_init(config->i2c_device, device_addr) != I2C_SUCCESS) {
         return L3G4200D_ERROR_INIT;
     }
+    // Extract the full-scale selection from the configuration (assuming it's in the upper 2 bits of the full_scale field)
+    full_scale = (config->full_scale >> 4) & 0x03;
+    LOG_INFO(TAG, "Initializing L3G4200D with full-scale range: %s", full_scale_range[full_scale]);
     return l3g4200d_config(config);
 }
 
@@ -169,9 +176,9 @@ l3g4200d_error_t l3g4200d_read_angular_velocity(l3g4200d_angular_velocity_data_t
     ERROR_CHECK(l3g4200d_read_multiple_register(OUT_X_L, buffer, ANGULAR_VELOCITY_BUFFER_SIZE),
                 "Failed to read angular velocity data", 
                 L3G4200D_ERROR_READ);
-    data->x = (int16_t)(buffer[1] << 8 | buffer[0]);
-    data->y = (int16_t)(buffer[3] << 8 | buffer[2]);
-    data->z = (int16_t)(buffer[5] << 8 | buffer[4]);
+    data->x = (int16_t)(buffer[1] << 8 | buffer[0]) * full_scale_sensitivity[full_scale];
+    data->y = (int16_t)(buffer[3] << 8 | buffer[2]) * full_scale_sensitivity[full_scale];
+    data->z = (int16_t)(buffer[5] << 8 | buffer[4]) * full_scale_sensitivity[full_scale];
     return L3G4200D_SUCCESS;
 }
 
