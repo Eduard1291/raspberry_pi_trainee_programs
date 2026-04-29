@@ -148,7 +148,7 @@ l3g4200d_error_t l3g4200d_init(l3g4200d_init_config_t *config){
     }
     // Extract the full-scale selection from the configuration (assuming it's in the upper 2 bits of the full_scale field)
     full_scale = (config->full_scale >> 4) & 0x03;
-    LOG_INFO(TAG, "Initializing L3G4200D with full-scale range: %s", full_scale_range[full_scale]);
+    INFO_LOG(TAG, "Initializing L3G4200D with full-scale range: %s", full_scale_range[full_scale]);
     return l3g4200d_config(config);
 }
 
