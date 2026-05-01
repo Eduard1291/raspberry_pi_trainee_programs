@@ -9,7 +9,66 @@
 #define SAMPLE_PERIOD_SECONDS 1
 #define L3G4200D_250DPS_SENSITIVITY 0.00875f
 
+
 #define TAG "i2c-acelerometer: "
+
+// Cambia a 1 para probar FIFO en stream mode
+#define TEST_FIFO_STREAM_MODE 1
+
+int test_fifo_stream_mode(void){
+    INFO_LOG(TAG, "Test L3G4200D FIFO Stream Mode");
+    if (l3g4200d_fifo_stream_mode(true) != L3G4200D_SUCCESS) {
+        ERROR_LOG(TAG, "No se pudo habilitar el modo FIFO stream");
+        l3g4200d_deinit();
+        return 1;
+    }
+
+    while (1) {
+        l3g4200d_fifo_stream_data_t fifo_data;
+        if (l3g4200d_read_fifo_in_stream_mode(&fifo_data) != L3G4200D_SUCCESS) {
+            ERROR_LOG(TAG, "No se pudo leer datos del FIFO");
+            break;
+        }
+        printf("\nFIFO contiene %u muestras:\n", fifo_data.num_samples);
+        for (uint8_t i = 0; i < fifo_data.num_samples; ++i) {
+            printf("  [%2u] X=%7.2f dps, Y=%7.2f dps, Z=%7.2f dps\n",
+                   i,
+                   fifo_data.samples[i].x,
+                   fifo_data.samples[i].y,
+                   fifo_data.samples[i].z);
+        }
+        fflush(stdout);
+        sleep(SAMPLE_PERIOD_SECONDS);
+    }
+    // Deshabilitar FIFO al salir
+    l3g4200d_fifo_stream_mode(false);
+    return 0;
+}
+
+int test_polling_mode(void){
+    INFO_LOG(TAG, "Test L3G4200D iniciado");
+    while (1) {
+        l3g4200d_angular_velocity_data_t angular_velocity;
+        l3g4200d_temperature_data_t temperature;
+        if (l3g4200d_read_angular_velocity(&angular_velocity) != L3G4200D_SUCCESS) {
+            ERROR_LOG(TAG, "No se pudo leer la velocidad angular");
+            break;
+        }
+        if (l3g4200d_read_temperature(&temperature) != L3G4200D_SUCCESS) {
+            ERROR_LOG(TAG, "No se pudo leer la temperatura");
+            break;
+        }
+        printf("\r\033[KVelocidad angular: X=%7.2f dps, Y=%7.2f dps, Z=%7.2f dps | Temperatura=%d C",
+               angular_velocity.x,
+               angular_velocity.y,
+               angular_velocity.z,
+               temperature.temp_celsius);
+        fflush(stdout);
+        sleep(SAMPLE_PERIOD_SECONDS);
+    }
+    return 0;
+}
+
 
 int main (void) {
     l3g4200d_init_config_t config = L3G4200D_SET_DEFAULT_CONFIG;
@@ -21,33 +80,11 @@ int main (void) {
         return 1;
     }
 
-    INFO_LOG(TAG, "Test L3G4200D iniciado");
-
-    while (1) {
-        l3g4200d_angular_velocity_data_t angular_velocity;
-        l3g4200d_temperature_data_t temperature;
-
-        if (l3g4200d_read_angular_velocity(&angular_velocity) != L3G4200D_SUCCESS) {
-            ERROR_LOG(TAG, "No se pudo leer la velocidad angular");
-            break;
-        }
-
-        if (l3g4200d_read_temperature(&temperature) != L3G4200D_SUCCESS) {
-            ERROR_LOG(TAG, "No se pudo leer la temperatura");
-            break;
-        }
-
-        printf("\r\033[KVelocidad angular: X=%7.2f dps, Y=%7.2f dps, Z=%7.2f dps | Temperatura=%d C",
-               angular_velocity.x,
-               angular_velocity.y,
-               angular_velocity.z,
-               temperature.temp_celsius);
-        fflush(stdout);
-
-        sleep(SAMPLE_PERIOD_SECONDS);
-    }
-
+#if TEST_FIFO_STREAM_MODE
+    return test_fifo_stream_mode();
+#else
+    return test_polling_mode();
+#endif
     l3g4200d_deinit();
-
     return 1;
 }
