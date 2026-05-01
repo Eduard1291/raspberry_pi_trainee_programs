@@ -83,17 +83,16 @@ typedef struct l3g4200d_status
 } l3g4200d_status_t;
 
 
+#define FIFO_STREAM_MODE_MAX_SAMPLES 32
+
 /**
- * @brief This structure defines the status of the FIFO buffer in the L3G4200D gyroscope sensor. 
- * It includes boolean fields that indicate the status of the FIFO buffer, such as overrun conditions
+ * @brief This structure defines the data read from the FIFO stream mode of the L3G4200D gyroscope sensor.
  */
-typedef struct l3g4200d_fifo_src
+typedef struct l3g4200d_fifo_stream_data
 {
-    bool overrun; /**< FIFO overrun. Set to 1 if new data has overwritten the previous unread data in the FIFO. */
-    bool empty; /**< FIFO empty. Set to 1 if the FIFO is empty. */
-    bool watermark; /**< FIFO watermark level. Set to 1 if the number of unread data stored in the FIFO is greater than or equal to the value stored in the FIFO threshold register (FIFO_CTRL_REG[4:0]). */
-    uint8_t stored_data; /**< Number of unread data stored in FIFO (0 to 31) */
-} l3g4200d_fifo_src_t;
+    l3g4200d_angular_velocity_data_t samples[FIFO_STREAM_MODE_MAX_SAMPLES]; /**< Array to store the angular velocity data samples read from the FIFO stream mode. Each sample contains X, Y, and Z axis data. */
+    uint8_t num_samples; /**< Number of valid samples in the FIFO stream data arrays */
+} l3g4200d_fifo_stream_data_t;
 
 /**
  * @brief This structure defines the configuration settings for the interrupt generation of the L3G4200D gyroscope sensor.
@@ -180,11 +179,18 @@ l3g4200d_error_t l3g4200d_read_temperature(l3g4200d_temperature_data_t *data);
 l3g4200d_error_t l3g4200d_read_status(l3g4200d_status_t *status);
 
 /**
+ * @brief Enables or disables the FIFO stream mode in the L3G4200D gyroscope sensor.
+ * @param enable Boolean indicating whether to enable (true) or disable (false) the FIFO stream mode.
+ * @return L3G4200D_SUCCESS on success, otherwise returns an appropriate error code indicating the type of failure (e.g., L3G4200D_ERROR_WRITE).
+ */
+l3g4200d_error_t l3g4200d_fifo_stream_mode(bool enable);
+
+/**
  * @brief Reads the FIFO source information from the L3G4200D gyroscope sensor and stores it in the provided FIFO source structure.
  * @param fifo_src Pointer to a structure where the read FIFO source information will be stored.
  * @return L3G4200D_SUCCESS on success, otherwise returns an appropriate error code indicating the type of failure (e.g., L3G4200D_ERROR_READ).
  */
-l3g4200d_error_t l3g4200d_read_fifo_src(l3g4200d_fifo_src_t *fifo_src);
+l3g4200d_error_t l3g4200d_read_fifo_in_stream_mode(l3g4200d_fifo_stream_data_t *fifo_stream_data);
 
 /**
  * @brief Configures the interrupt settings for the L3G4200D gyroscope sensor.

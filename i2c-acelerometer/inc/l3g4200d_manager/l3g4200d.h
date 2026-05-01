@@ -208,7 +208,7 @@ typedef enum l3g4200d_pd_mode {
  * The high-pass filter can be configured to operate in various modes, 
  * which affect how the sensor processes the angular velocity data. 
  * The modes are determined by the settings of the HPM1 and HPM0 bits in the control register. 
- * The table below summarizes the modes based on the HPM1
+ * The table below summarizes the modes based on the HPM1 and HPM0 bits:
  * +--------+--------+-----------------------------------------------+
  *  | HPM1   | HPM0   | High Pass Filter Mode                         |
  *  +--------+--------+-----------------------------------------------+
@@ -262,7 +262,18 @@ typedef enum l3g4200d_hpf_cutoff
 
 } l3g4200d_hpf_cutoff_t;
 
-
+/**
+ * @brief Configures the L3G4200D gyroscope sensor with the specified settings.
+ * This enum allows the user to select the desired FIFO mode for the L3G4200D gyroscope sensor.
+ */
+typedef enum l3g4200d_fifo_mode
+{
+    FIFO_MODE_BYPASS = 0b000, /**< Bypass mode: FIFO is disabled and empty. */
+    FIFO_MODE_FIFO = 0b001, /**< FIFO mode: Stop when full. Oldest data is overwritten. */
+    FIFO_MODE_STREAM = 0b010, /**< Stream mode: Keep the most recent data in the FIFO. */
+    FIFO_MODE_STREAM_TO_FIFO = 0b011, /**< Stream-to-FIFO mode: stream before the event, FIFO afterward */
+    FIFO_MODE_BYPASS_TO_STREAM = 0b100 /**< Bypass-to-Stream mode: Don't record before the event; stream afterward */
+} l3g4200d_fifo_mode_t;
 
 /**
  * @brief Enumeration of the L3G4200D gyroscope's register addresses.

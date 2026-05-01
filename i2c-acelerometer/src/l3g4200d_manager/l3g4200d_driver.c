@@ -15,6 +15,12 @@
     }while (0)
 
 #define ANGULAR_VELOCITY_BUFFER_SIZE 6
+#define FIFO_SAMPLE_COUNT 32
+#define FIFO_WATERMARK_LEVEL 0x1F
+#define FIFO_SRC_WTM_MASK SET_BIT(7)
+#define FIFO_SRC_OVRN_MASK SET_BIT(6)
+#define FIFO_SRC_EMPTY_MASK SET_BIT(5)
+#define FIFO_SRC_STORED_DATA_MASK 0x1F
 
 /*typedefs----------------------------------------------*/
 
@@ -218,12 +224,66 @@ l3g4200d_error_t l3g4200d_read_status(l3g4200d_status_t *status){
 }
 
 /**
+ * @brief Enables or disables the FIFO stream mode in the L3G4200D gyroscope sensor.
+ * @param enable Boolean indicating whether to enable (true) or disable (false) the FIFO stream mode.
+ * @return L3G4200D_SUCCESS on success, otherwise returns an appropriate error code indicating the type of failure (e.g., L3G4200D_ERROR_WRITE).
+ */
+l3g4200d_error_t l3g4200d_fifo_stream_mode(bool enable){
+    uint8_t ctrl_reg5_value;
+    uint8_t fifo_ctrl_value;
+    uint8_t fifo_mode_bits;
+
+    ERROR_CHECK(l3g4200d_read_register(CTRL_REG5, &ctrl_reg5_value), 
+                "Failed to read CTRL_REG5",
+                L3G4200D_ERROR_READ);
+    if (enable) {
+        // Set the FIFO enable bit in CTRL_REG5 to enable FIFO functionality. 
+        fifo_mode_bits = ctrl_reg5_value | CTRL_REG5_FIFO_ENABLE;
+        fifo_ctrl_value = (FIFO_MODE_STREAM << 5) | FIFO_WATERMARK_LEVEL;
+    } else {
+        // Set the FIFO disable bit in CTRL_REG5 to enable FIFO functionality
+        fifo_mode_bits = ctrl_reg5_value & ~CTRL_REG5_FIFO_ENABLE;
+        fifo_ctrl_value = FIFO_MODE_BYPASS << 5;
+    }
+
+    ERROR_CHECK(l3g4200d_write_register(CTRL_REG5, fifo_mode_bits), 
+                "Failed to write CTRL_REG5", 
+                L3G4200D_ERROR_WRITE);
+    ERROR_CHECK(l3g4200d_write_register(FIFO_CTRL_REG, fifo_ctrl_value), 
+                "Failed to write FIFO_CTRL_REG", 
+                L3G4200D_ERROR_WRITE);
+    return L3G4200D_SUCCESS;
+}
+
+/**
  * @brief Reads the FIFO source information from the L3G4200D gyroscope sensor and stores it in the provided FIFO source structure.
- * @param fifo_src Pointer to a structure where the read FIFO source information will be stored.
+ * @param fifo_src Pointer to a structure where the read FIFO source information will be stor   ed.
  * @return L3G4200D_SUCCESS on success, otherwise returns an appropriate error code indicating the type of failure (e.g., L3G4200D_ERROR_READ).
  */
-l3g4200d_error_t l3g4200d_read_fifo_src(l3g4200d_fifo_src_t *fifo_src) {
-    
+l3g4200d_error_t l3g4200d_read_fifo_in_stream_mode(l3g4200d_fifo_stream_data_t *fifo_stream_data) {
+    uint8_t fifo_src_reg;
+    uint8_t stored_data;
+
+    ERROR_CHECK(l3g4200d_read_register(FIFO_SRC_REG, &fifo_src_reg),
+                "Failed to read FIFO_SRC_REG",
+                L3G4200D_ERROR_READ);
+
+    fifo_stream_data->num_samples = 0;
+
+    if ((fifo_src_reg & FIFO_SRC_EMPTY_MASK) != 0) {
+        return L3G4200D_SUCCESS;
+    }
+
+    stored_data = fifo_src_reg & FIFO_SRC_STORED_DATA_MASK;
+    fifo_stream_data->num_samples = stored_data;
+
+    for (uint8_t i = 0; i < fifo_stream_data->num_samples; i++) {
+        ERROR_CHECK(l3g4200d_read_angular_velocity(&fifo_stream_data->samples[i]),
+                    "Failed to read FIFO angular velocity data",
+                    L3G4200D_ERROR_READ);
+    }
+
+    return L3G4200D_SUCCESS;
 }
 
 /**
