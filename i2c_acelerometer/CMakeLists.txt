@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(hello_world C)
+project(i2c_acelerometer C)
 
 # Estándar de C
 set(CMAKE_C_STANDARD 11)

@@ -10,10 +10,10 @@
 #define L3G4200D_250DPS_SENSITIVITY 0.00875f
 
 
-#define TAG "i2c-acelerometer: "
+#define TAG "i2c-acelerometer"
 
 // Cambia a 1 para probar FIFO en stream mode
-#define TEST_FIFO_STREAM_MODE 1
+#define TEST_FIFO_STREAM_MODE 0
 
 int test_fifo_stream_mode(void){
     INFO_LOG(TAG, "Test L3G4200D FIFO Stream Mode");
@@ -45,11 +45,13 @@ int test_fifo_stream_mode(void){
     return 0;
 }
 
+l3g4200d_angular_velocity_data_t angular_velocity;
+l3g4200d_temperature_data_t temperature;
+
 int test_polling_mode(void){
     INFO_LOG(TAG, "Test L3G4200D iniciado");
+    
     while (1) {
-        l3g4200d_angular_velocity_data_t angular_velocity;
-        l3g4200d_temperature_data_t temperature;
         if (l3g4200d_read_angular_velocity(&angular_velocity) != L3G4200D_SUCCESS) {
             ERROR_LOG(TAG, "No se pudo leer la velocidad angular");
             break;
@@ -81,9 +83,9 @@ int main (void) {
     }
 
 #if TEST_FIFO_STREAM_MODE
-    return test_fifo_stream_mode();
+    test_fifo_stream_mode();
 #else
-    return test_polling_mode();
+    test_polling_mode();
 #endif
     l3g4200d_deinit();
     return 1;

@@ -268,6 +268,7 @@ l3g4200d_error_t l3g4200d_read_fifo_in_stream_mode(l3g4200d_fifo_stream_data_t *
                 "Failed to read FIFO_SRC_REG",
                 L3G4200D_ERROR_READ);
 
+    INFO_LOG(TAG,"FIFO_SRC_REG: %d", fifo_src_reg);
     fifo_stream_data->num_samples = 0;
 
     if ((fifo_src_reg & FIFO_SRC_EMPTY_MASK) != 0) {
@@ -275,6 +276,7 @@ l3g4200d_error_t l3g4200d_read_fifo_in_stream_mode(l3g4200d_fifo_stream_data_t *
     }
 
     stored_data = fifo_src_reg & FIFO_SRC_STORED_DATA_MASK;
+    INFO_LOG(TAG,"Stored data: %d", stored_data);
     fifo_stream_data->num_samples = stored_data;
 
     for (uint8_t i = 0; i < fifo_stream_data->num_samples; i++) {
