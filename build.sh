@@ -1,37 +1,43 @@
 #!/bin/bash
 
 set -e
-projectyDir=$1
-# Eliminar la barra final si existe
-projectyDir=${projectyDir%/} 
 
-#verificar si se ha proporcionado un argumento
-if [ -z "$projectyDir" ]; then
-    echo "Uso: $0 <directorio_del_proyecto>"
+PROJECT_DIR=$1
+
+# Comprueba y remueve la barra final si esta agregada
+PROJECT_DIR=${PROJECT_DIR%/}
+
+# comprueba si los parametros de entrada son validos
+if [ -z "$PROJECT_DIR" ]; then
+    echo "Uso: $0 <directorio_proyecto>"
     exit 1
 fi
 
-#verificar si el directorio del proyecto existe
-if [ ! -d "$projectyDir" ]; then
-    echo "El directorio del proyecto no existe."
+# Comprueba si el directorio de construcción existe
+if [ ! -d "$PROJECT_DIR" ]; then
+    echo "No existe el proyecto: $PROJECT_DIR"
     exit 1
 fi
 
-# Verificar si el directorio de build existe
-if [ -e "$projectyDir/build" ]; then
-    echo "El directorio de build ya existe. Eliminando..."
-    rm -rf "$projectyDir/build"
-    mkdir -p "$projectyDir/build"
-else
-    echo "El directorio de build no existe. Creando..."
-    mkdir -p "$projectyDir/build"
-fi
+BUILD_DIR="$PROJECT_DIR/build"
 
-# Cambiar al directorio de build
-cd "$projectyDir/build"
+echo "Limpiando build..."
+rm -rf "$BUILD_DIR"
 
-# Ejecutar CMake para configurar el proyecto
-cmake ..
-cmake --build . --config Release
+mkdir -p "$BUILD_DIR"
 
+TOOLCHAIN_FILE="$(pwd)/toolchain/raspberrypi64.cmake"
+
+echo "Toolchain: $TOOLCHAIN_FILE"
+
+cmake \
+    -S "$PROJECT_DIR" \
+    -B "$BUILD_DIR" \
+    -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" \
+    -DCMAKE_BUILD_TYPE=Release
+
+cmake --build "$BUILD_DIR" -j$(nproc)
+
+echo ""
+echo "Build completado."
 exit 0
